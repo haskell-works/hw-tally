@@ -34,14 +34,18 @@ data Ballot = Ballot
   , candidates :: Map CandidateName CandidateInfo
   } deriving (Eq, Show, Generic, ToJSON, FromJSON)
 
-data Election = Election
-  { ballot   :: Ballot
-  , elected  :: Set CandidateName
-  , excluded :: Set CandidateName
-  , deferred :: Set CandidateName
-  , votes    :: [Vote]
-  , quota    :: Double
-  , results  :: [CandidateName]
-  , round    :: Int
-  , history  :: [Text]
+data Progress = Ongoing | Done deriving (Eq, Show, Generic, ToJSON, FromJSON)
+
+data Step = Step
+  { round        :: Int
+  , distribution :: Int
+  , ballot       :: Ballot
+  , votes        :: [Vote]
+  , elected      :: Set CandidateName
+  , excluded     :: Set CandidateName
+  , deferred     :: Set CandidateName
+  , quota        :: Double
+  , results      :: [CandidateName]
+  , annotation   :: Text
+  , progress     :: Progress
   } deriving (Eq, Show, Generic, ToJSON, FromJSON)
