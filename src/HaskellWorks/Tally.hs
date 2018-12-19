@@ -9,7 +9,9 @@ module HaskellWorks.Tally
 
 import Control.Lens
 import Data.Generics.Product.Any
+import Data.List
 import Data.Map                  (Map)
+import Data.Maybe
 import Data.Set                  (Set)
 import Data.Tuple
 
@@ -45,5 +47,16 @@ tallyVotes votes ballot exclusions = M.unionsWith (+) $ do
   topCandidate <- take 1 (vote ^. the @"preferences")
   return (M.singleton topCandidate (vote ^. the @"value"))
 
+elect :: Z.Step -> Z.CandidateName -> Double -> Z.Step
+elect step candidate value = step
+  & the @"elected" %~ S.insert candidate
+  & the @"votes"   .~ adjustedVoteValues -- TODO this adjustment is fake
+  where adjustedVoteValues = step ^. the @"votes"
+
 stepElection :: Z.Step -> Z.Step
-stepElection step = step
+stepElection step = case maybeTopChoice of
+  Just (value, candidate) -> elect step candidate value
+  Nothing                 -> step & the @"progress" .~ Z.Done
+  where maybeTopChoice  = listToMaybe (sortBy (flip compare) (fmap swap (M.toList tally)))
+        tally           = tallyVotes (step ^. the @"votes") (step ^. the @"ballot") exclusions
+        exclusions      = step ^. the @"elected" <> step ^. the @"excluded" <> step ^. the @"deferred"
