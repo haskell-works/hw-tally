@@ -7,12 +7,15 @@ module App.Commands.Run
   ) where
 
 import Control.Lens
+import Data.Aeson
 import Data.Generics.Product.Any
 import Data.Semigroup            ((<>))
 import Options.Applicative       hiding (columns)
 
-import qualified App.Commands.Types as Z
-import qualified Data.Text.IO       as T
+import qualified App.Commands.Types      as Z
+import qualified Data.ByteString.Lazy    as LBS
+import qualified HaskellWorks.Tally.Type as Z
+import qualified System.IO               as IO
 
 {-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
 
@@ -21,9 +24,9 @@ runRun opt = do
   let directory = opt ^. the @"directory"
   let electionFile = directory <> "/election"
 
-  contents <- T.readFile electionFile
+  contents :: Either String Z.Election <- eitherDecode <$> LBS.readFile electionFile
 
-  T.putStr contents
+  IO.print contents
 
   return ()
 

@@ -49,6 +49,8 @@ executable hw-tally
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base                  >= 4        && < 5
+    , aeson
+    , bytestring
     , generic-lens
     , hw-tally
     , lens
