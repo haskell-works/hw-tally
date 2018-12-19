@@ -23,6 +23,7 @@ source-repository head
 library
     exposed-modules:
       HaskellWorks.Tally
+      HaskellWorks.Tally.Type
     hs-source-dirs: src
     other-modules:
         Paths_hw_tally
