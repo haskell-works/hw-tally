@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module HaskellWorks.Tally where
+module HaskellWorks.Tally
+  ( beginElection
+  , stepElection
+  ) where
 
 import Control.Lens
 
@@ -21,3 +24,6 @@ beginElection ballot votes = Z.Step
   , Z.annotation    = "Begin election"
   , Z.progress      = Z.Ongoing
   }
+
+stepElection :: Z.Step -> Z.Step
+stepElection step = step

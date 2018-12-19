@@ -58,6 +58,7 @@ executable hw-tally
     , generic-lens
     , hw-tally
     , lens
+    , mtl
     , optparse-applicative  >= 0.14     && < 0.15
     , text
     , vector                >= 0.12     && < 0.13

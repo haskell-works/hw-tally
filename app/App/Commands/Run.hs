@@ -8,6 +8,8 @@ module App.Commands.Run
 
 import Control.Lens
 import Control.Monad
+import Control.Monad.Except
+import Control.Monad.IO.Class
 import Data.Generics.Product.Any
 import Data.List                 (isSuffixOf)
 import Data.Semigroup            ((<>))
@@ -23,21 +25,18 @@ import qualified System.IO               as IO
 {-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
 
 runRun :: Z.RunOptions -> IO ()
-runRun opt = do
+runRun opt = void $ runExceptT $ do
   let ballotFile  = opt ^. the @"ballotFile"
   let votePath    = opt ^. the @"votePath"
 
-  files <- IO.listDirectory votePath
-  let voteFiles = filter (".yaml" `isSuffixOf`) files
+  files <- liftIO $ IO.listDirectory votePath
+  let voteFiles = (\f -> votePath <> "/" <> f) <$> filter (".yaml" `isSuffixOf`) files
 
-  ballot :: Either String Z.Ballot <- Y.decodeEither <$> BS.readFile ballotFile
+  ballot  :: Z.Ballot <- liftIO (BS.readFile ballotFile) <&> Y.decodeEither >>= liftEither
+  votes   :: [Z.Vote] <- sequence <$> forM voteFiles (fmap Y.decodeEither . liftIO . BS.readFile) >>= liftEither
 
-  IO.print ballot
-
-  forM_ voteFiles $ \voteFile -> do
-    IO.putStrLn voteFile
-
-  -- IO.print vote
+  liftIO $ IO.print ballot
+  liftIO $ IO.print votes
 
 optsRun :: Parser Z.RunOptions
 optsRun = Z.RunOptions
