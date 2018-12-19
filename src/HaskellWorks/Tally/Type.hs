@@ -10,9 +10,7 @@ import GHC.Generics
 
 data Gender = Female | NonFemale deriving (Eq, Ord, Show, Generic)
 
-newtype CandidateName = CandidateName
-  { name :: Text
-  } deriving (Eq, Ord, Show, Generic)
+type CandidateName = Text
 
 newtype CandidateInfo = CandidateInfo
   { gender :: Gender
