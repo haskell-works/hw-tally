@@ -23,7 +23,6 @@ source-repository head
 library
     exposed-modules:
       HaskellWorks.Tally
-      HaskellWorks.Tally.Json
       HaskellWorks.Tally.Type
     hs-source-dirs: src
     other-modules:
@@ -36,6 +35,7 @@ library
       , directory
       , generic-lens    >= 0.5.1.0      && < 1.2
       , text            >= 1.2.2.2      && < 1.3
+      , vector
 
 test-suite hw-tally-test
     type: exitcode-stdio-1.0
