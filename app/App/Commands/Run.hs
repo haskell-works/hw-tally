@@ -1,26 +1,34 @@
+{-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications    #-}
 
 module App.Commands.Run
   ( cmdRun
   ) where
 
-import App.Commands.Types
 import Control.Lens
-import Data.Maybe
-import Data.Semigroup      ((<>))
-import Data.Word
-import Foreign
-import Options.Applicative hiding (columns)
+import Data.Generics.Product.Any
+import Data.Semigroup            ((<>))
+import Options.Applicative       hiding (columns)
 
-import qualified System.IO as IO
+import qualified App.Commands.Types as Z
+import qualified Data.Text.IO       as T
 
 {-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
 
-runRun :: RunOptions -> IO ()
-runRun _ = return ()
+runRun :: Z.RunOptions -> IO ()
+runRun opt = do
+  let directory = opt ^. the @"directory"
+  let electionFile = directory <> "/election"
 
-optsRun :: Parser RunOptions
-optsRun = RunOptions
+  contents <- T.readFile electionFile
+
+  T.putStr contents
+
+  return ()
+
+optsRun :: Parser Z.RunOptions
+optsRun = Z.RunOptions
   <$> strOption
         (   long "directory"
         <>  short 'd'

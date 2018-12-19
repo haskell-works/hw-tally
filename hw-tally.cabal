@@ -49,9 +49,11 @@ executable hw-tally
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base                  >= 4        && < 5
+    , generic-lens
     , hw-tally
     , lens
     , optparse-applicative  >= 0.14     && < 0.15
+    , text
     , vector                >= 0.12     && < 0.13
   default-language: Haskell2010
 
