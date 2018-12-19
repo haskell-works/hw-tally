@@ -7,36 +7,51 @@ module App.Commands.Run
   ) where
 
 import Control.Lens
-import Data.Aeson
+import Control.Monad
 import Data.Generics.Product.Any
+import Data.List                 (isSuffixOf)
 import Data.Semigroup            ((<>))
 import Options.Applicative       hiding (columns)
 
 import qualified App.Commands.Types      as Z
-import qualified Data.ByteString.Lazy    as LBS
+import qualified Data.ByteString         as BS
+import qualified Data.Yaml               as Y
 import qualified HaskellWorks.Tally.Type as Z
+import qualified System.Directory        as IO
 import qualified System.IO               as IO
 
 {-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
 
 runRun :: Z.RunOptions -> IO ()
 runRun opt = do
-  let directory = opt ^. the @"directory"
-  let electionFile = directory <> "/election"
+  let ballotFile  = opt ^. the @"ballotFile"
+  let votePath    = opt ^. the @"votePath"
 
-  contents :: Either String Z.Election <- eitherDecode <$> LBS.readFile electionFile
+  files <- IO.listDirectory votePath
+  let voteFiles = filter (".yaml" `isSuffixOf`) files
 
-  IO.print contents
+  ballot :: Either String Z.Ballot <- Y.decodeEither <$> BS.readFile ballotFile
 
-  return ()
+  IO.print ballot
+
+  forM_ voteFiles $ \voteFile -> do
+    IO.putStrLn voteFile
+
+  -- IO.print vote
 
 optsRun :: Parser Z.RunOptions
 optsRun = Z.RunOptions
   <$> strOption
-        (   long "directory"
-        <>  short 'd'
-        <>  help "Election directory"
-        <>  metavar "STRING"
+        (   long "ballot-file"
+        <>  short 'b'
+        <>  help "Ballot File"
+        <>  metavar "FILENAME"
+        )
+  <*> strOption
+        (   long "vote-path"
+        <>  short 'v'
+        <>  help "Vote Path"
+        <>  metavar "DIR"
         )
 
 cmdRun :: Mod CommandFields (IO ())

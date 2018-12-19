@@ -8,8 +8,12 @@ shift
 
 case "$cmd" in
   install)
-    cabal new-install \
-      --test --no-run-tests --bench --no-run-benchmarks \
+    cabal new-install                      \
+      --symlink-bindir=$HOME/.local/bin    \
+      exe:hw-tally                         \
+      -j4                                  \
+      --overwrite-policy=always            \
+      --disable-tests --disable-benchmarks \
       $CABAL_FLAGS "$@"
     ;;
 

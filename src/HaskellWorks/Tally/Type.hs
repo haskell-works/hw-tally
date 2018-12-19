@@ -29,14 +29,19 @@ newtype Distributions = Distributions
   { votesByCandidate :: Map CandidateName [Vote]
   } deriving (Eq, Show, Generic, ToJSON, FromJSON)
 
+data Ballot = Ballot
+  { seats      :: Int
+  , candidates :: Map CandidateName CandidateInfo
+  } deriving (Eq, Show, Generic, ToJSON, FromJSON)
+
 data Election = Election
-  { candidates :: Map CandidateName CandidateInfo
-  , elected    :: Set CandidateName
-  , excluded   :: Set CandidateName
-  , deferred   :: Set CandidateName
-  , votes      :: [Vote]
-  , quota      :: Double
-  , results    :: [CandidateName]
-  , round      :: Int
-  , history    :: [Text]
+  { ballot   :: Ballot
+  , elected  :: Set CandidateName
+  , excluded :: Set CandidateName
+  , deferred :: Set CandidateName
+  , votes    :: [Vote]
+  , quota    :: Double
+  , results  :: [CandidateName]
+  , round    :: Int
+  , history  :: [Text]
   } deriving (Eq, Show, Generic, ToJSON, FromJSON)

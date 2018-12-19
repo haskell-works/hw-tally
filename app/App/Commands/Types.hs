@@ -6,6 +6,7 @@ module App.Commands.Types
 
 import GHC.Generics
 
-newtype RunOptions = RunOptions
-  { directory     :: FilePath
+data RunOptions = RunOptions
+  { ballotFile :: FilePath
+  , votePath   :: FilePath
   } deriving (Eq, Show, Generic)
