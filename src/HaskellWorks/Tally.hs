@@ -9,8 +9,11 @@ module HaskellWorks.Tally
 
 import Control.Lens
 import Data.Generics.Product.Any
+import Data.Map                  (Map)
 import Data.Set                  (Set)
+import Data.Tuple
 
+import qualified Data.Map                as M
 import qualified Data.Set                as S
 import qualified HaskellWorks.Tally.Type as Z
 
@@ -29,15 +32,18 @@ beginElection ballot votes = Z.Step
   , Z.progress      = Z.Ongoing
   }
 
-voteExcluding :: Z.Vote -> Set Z.CandidateName -> Z.Vote
-voteExcluding vote exclusions = vote & the @"preferences" %~ filter (`S.member` exclusions)
+voteExcluding :: Set Z.CandidateName -> Z.Vote -> Z.Vote
+voteExcluding exclusions vote = vote & the @"preferences" %~ filter (`S.member` exclusions)
 
 tallyVotes :: ()
   => [Z.Vote]
   -> Z.Ballot
   -> Set Z.CandidateName
-  -> Z.CandidateName
-tallyVotes votes ballot exclusions = undefined
+  -> Map Z.CandidateName Double
+tallyVotes votes ballot exclusions = M.unionsWith (+) $ do
+  vote <- voteExcluding exclusions <$> votes
+  topCandidate <- take 1 (vote ^. the @"preferences")
+  return (M.singleton topCandidate (vote ^. the @"value"))
 
 stepElection :: Z.Step -> Z.Step
 stepElection step = step
