@@ -13,14 +13,16 @@ import Control.Monad.IO.Class
 import Data.Generics.Product.Any
 import Data.List                 (isSuffixOf)
 import Data.Semigroup            ((<>))
+import HaskellWorks.Tally
 import Options.Applicative       hiding (columns)
 
-import qualified App.Commands.Types      as Z
-import qualified Data.ByteString         as BS
-import qualified Data.Yaml               as Y
-import qualified HaskellWorks.Tally.Type as Z
-import qualified System.Directory        as IO
-import qualified System.IO               as IO
+import qualified App.Commands.Types               as Z
+import qualified Data.ByteString                  as BS
+import qualified Data.Yaml                        as Y
+import qualified HaskellWorks.Tally.IO.ByteString as BS
+import qualified HaskellWorks.Tally.Type          as Z
+import qualified System.Directory                 as IO
+import qualified System.IO                        as IO
 
 {-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
 
@@ -29,14 +31,14 @@ runRun opt = void $ runExceptT $ do
   let ballotFile  = opt ^. the @"ballotFile"
   let votePath    = opt ^. the @"votePath"
 
-  files <- liftIO $ IO.listDirectory votePath
-  let voteFiles = (\f -> votePath <> "/" <> f) <$> filter (".yaml" `isSuffixOf`) files
+  ballot  :: Z.Ballot <- liftIO (BS.readFile ballotFile                           ) <&> Y.decodeEither      >>= liftEither
+  votes   :: [Z.Vote] <- liftIO (BS.readFilesInDir votePath (".yaml" `isSuffixOf`)) <&> mapM Y.decodeEither >>= liftEither
 
-  ballot  :: Z.Ballot <- liftIO (BS.readFile ballotFile) <&> Y.decodeEither >>= liftEither
-  votes   :: [Z.Vote] <- sequence <$> forM voteFiles (fmap Y.decodeEither . liftIO . BS.readFile) >>= liftEither
+  let step0 = beginElection ballot votes
 
   liftIO $ IO.print ballot
   liftIO $ IO.print votes
+  liftIO $ IO.print step0
 
 optsRun :: Parser Z.RunOptions
 optsRun = Z.RunOptions
