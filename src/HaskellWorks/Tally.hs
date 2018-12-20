@@ -21,7 +21,7 @@ import qualified Data.Map                as M
 import qualified Data.Set                as S
 import qualified HaskellWorks.Tally.Type as Z
 
-beginElection :: Z.Ballot -> [Z.Vote] -> Z.Step
+beginElection :: Z.Ballot -> Map Z.VoteId Z.Vote -> Z.Step
 beginElection ballot votes = Z.Step
   { Z.round         = 0
   , Z.distribution  = 0
@@ -41,12 +41,12 @@ voteExcluding exclusions vote =
   vote & the @"preferences" %~ filter (`S.member` exclusions)
 
 tallyVotes :: ()
-  => [Z.Vote]
+  => Map Z.VoteId Z.Vote
   -> Z.Ballot
   -> Set Z.CandidateName
   -> Map Z.CandidateName Double
 tallyVotes votes ballot exclusions = M.unionsWith (+) $ do
-  vote <- voteExcluding exclusions <$> votes
+  vote <- voteExcluding exclusions . snd <$> M.toList votes
   topCandidate <- take 1 (vote ^. the @"preferences")
   return (M.singleton topCandidate (vote ^. the @"value"))
 

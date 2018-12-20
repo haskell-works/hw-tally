@@ -19,6 +19,7 @@ import Options.Applicative       hiding (columns)
 
 import qualified App.Commands.Types               as Z
 import qualified Data.ByteString                  as BS
+import qualified Data.Map                         as M
 import qualified Data.Text                        as T
 import qualified Data.Yaml                        as Y
 import qualified HaskellWorks.Tally.IO.ByteString as BS
@@ -41,7 +42,7 @@ runRun opt = void $ runExceptT $ do
   ballot      :: Z.Ballot                 <- liftIO (BS.readFile ballotFile                           ) <&> Y.decodeEither  >>= liftEither
   preferences :: [(Text, Z.Preferences)]  <- liftIO (BS.readFilesInDir votePath (".yaml" `isSuffixOf`)) <&> mapM decodeVote >>= liftEither
 
-  let votes = uncurry mkVote <$> preferences
+  let votes = M.fromList $ (\v -> (v ^. the @"id", v)). uncurry mkVote <$> preferences
   let step0 = beginElection ballot votes
 
   liftIO $ IO.print ballot

@@ -16,6 +16,8 @@ type CandidateName = Text
 
 type Preferences = [CandidateName]
 
+type VoteId = Text
+
 newtype CandidateInfo = CandidateInfo
   { gender :: Gender
   } deriving (Eq, Ord, Show, Generic, ToJSON, FromJSON)
@@ -43,7 +45,7 @@ data Step = Step
   { round        :: Int
   , distribution :: Int
   , ballot       :: Ballot
-  , votes        :: [Vote]
+  , votes        :: Map VoteId Vote
   , elected      :: Set CandidateName
   , excluded     :: Set CandidateName
   , deferred     :: Set CandidateName
