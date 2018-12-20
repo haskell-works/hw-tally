@@ -13,11 +13,13 @@ import Control.Monad.IO.Class
 import Data.Generics.Product.Any
 import Data.List                 (isSuffixOf)
 import Data.Semigroup            ((<>))
+import Data.Text                 (Text)
 import HaskellWorks.Tally
 import Options.Applicative       hiding (columns)
 
 import qualified App.Commands.Types               as Z
 import qualified Data.ByteString                  as BS
+import qualified Data.Text                        as T
 import qualified Data.Yaml                        as Y
 import qualified HaskellWorks.Tally.IO.ByteString as BS
 import qualified HaskellWorks.Tally.Type          as Z
@@ -26,14 +28,20 @@ import qualified System.IO                        as IO
 
 {-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
 
+decodeVote :: (FilePath, BS.ByteString) -> Either String (Text, Z.Preferences)
+decodeVote (filePath, contents) = case Y.decodeEither contents of
+  Right preferences -> Right (T.pack filePath, preferences)
+  Left e            -> Left e
+
 runRun :: Z.RunOptions -> IO ()
 runRun opt = void $ runExceptT $ do
   let ballotFile  = opt ^. the @"ballotFile"
   let votePath    = opt ^. the @"votePath"
 
-  ballot  :: Z.Ballot <- liftIO (BS.readFile ballotFile                           ) <&> Y.decodeEither      >>= liftEither
-  votes   :: [Z.Vote] <- liftIO (BS.readFilesInDir votePath (".yaml" `isSuffixOf`)) <&> mapM Y.decodeEither >>= liftEither
+  ballot      :: Z.Ballot                 <- liftIO (BS.readFile ballotFile                           ) <&> Y.decodeEither  >>= liftEither
+  preferences :: [(Text, Z.Preferences)]  <- liftIO (BS.readFilesInDir votePath (".yaml" `isSuffixOf`)) <&> mapM decodeVote >>= liftEither
 
+  let votes = uncurry mkVote <$> preferences
   let step0 = beginElection ballot votes
 
   liftIO $ IO.print ballot

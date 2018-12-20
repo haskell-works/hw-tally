@@ -5,6 +5,7 @@
 module HaskellWorks.Tally
   ( beginElection
   , stepElection
+  , mkVote
   ) where
 
 import Control.Lens
@@ -13,6 +14,7 @@ import Data.List
 import Data.Map                  (Map)
 import Data.Maybe
 import Data.Set                  (Set)
+import Data.Text                 (Text)
 import Data.Tuple
 
 import qualified Data.Map                as M
@@ -35,7 +37,8 @@ beginElection ballot votes = Z.Step
   }
 
 voteExcluding :: Set Z.CandidateName -> Z.Vote -> Z.Vote
-voteExcluding exclusions vote = vote & the @"preferences" %~ filter (`S.member` exclusions)
+voteExcluding exclusions vote =
+  vote & the @"preferences" %~ filter (`S.member` exclusions)
 
 tallyVotes :: ()
   => [Z.Vote]
@@ -46,6 +49,15 @@ tallyVotes votes ballot exclusions = M.unionsWith (+) $ do
   vote <- voteExcluding exclusions <$> votes
   topCandidate <- take 1 (vote ^. the @"preferences")
   return (M.singleton topCandidate (vote ^. the @"value"))
+
+mkVote :: Text -> Z.Preferences -> Z.Vote
+mkVote voteId preferences = Z.Vote
+  { Z.id          = voteId
+  , Z.value       = 1.0
+  , Z.preferences = preferences
+  , Z.spent       = M.empty
+  , Z.history     = []
+  }
 
 elect :: Z.Step -> Z.CandidateName -> Double -> Z.Step
 elect step candidate value = step

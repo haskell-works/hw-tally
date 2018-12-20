@@ -14,20 +14,18 @@ data Gender = Female | NonFemale deriving (Eq, Ord, Show, Generic, ToJSON, FromJ
 
 type CandidateName = Text
 
+type Preferences = [CandidateName]
+
 newtype CandidateInfo = CandidateInfo
   { gender :: Gender
   } deriving (Eq, Ord, Show, Generic, ToJSON, FromJSON)
 
 data Vote = Vote
-  { value       :: Double
-  , preferences :: [CandidateName]
-  } deriving (Eq, Show, Generic, ToJSON, FromJSON)
-
-data VoteInfo = VoteInfo
-  { id      :: Text
-  , vote    :: Vote
-  , spent   :: Map CandidateName Double
-  , history :: [Text]
+  { id          :: Text
+  , value       :: Double
+  , preferences :: Preferences
+  , spent       :: Map CandidateName Double
+  , history     :: [Text]
   } deriving (Eq, Show, Generic, ToJSON, FromJSON)
 
 newtype Distributions = Distributions
