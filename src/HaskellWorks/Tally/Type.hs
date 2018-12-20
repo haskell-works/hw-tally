@@ -21,8 +21,13 @@ newtype CandidateInfo = CandidateInfo
 data Vote = Vote
   { value       :: Double
   , preferences :: [CandidateName]
-  , spent       :: Map CandidateName Double
-  , history     :: [Text]
+  } deriving (Eq, Show, Generic, ToJSON, FromJSON)
+
+data VoteInfo = VoteInfo
+  { id      :: Text
+  , vote    :: Vote
+  , spent   :: Map CandidateName Double
+  , history :: [Text]
   } deriving (Eq, Show, Generic, ToJSON, FromJSON)
 
 newtype Distributions = Distributions
