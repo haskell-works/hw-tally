@@ -44,11 +44,13 @@ tallyVotes :: ()
   => Map Z.VoteId Z.Vote
   -> Z.Ballot
   -> Set Z.CandidateName
-  -> Map Z.CandidateName Double
-tallyVotes votes ballot exclusions = M.unionsWith (+) $ do
+  -> Map Z.CandidateName (Double, Set Z.VoteId)
+tallyVotes votes ballot exclusions = M.unionsWith merge $ do
   vote <- voteExcluding exclusions . snd <$> M.toList votes
   topCandidate <- take 1 (vote ^. the @"preferences")
-  return (M.singleton topCandidate (vote ^. the @"value"))
+  return (M.singleton topCandidate (vote ^. the @"value", undefined))
+  where merge :: (Double, Set Z.VoteId) -> (Double, Set Z.VoteId) -> (Double, Set Z.VoteId)
+        merge (aValue, aVoteId) (bValue, bVoteId) = (aValue + bValue, aVoteId <> bVoteId)
 
 mkVote :: Text -> Z.Preferences -> Z.Vote
 mkVote voteId preferences = Z.Vote
@@ -59,15 +61,15 @@ mkVote voteId preferences = Z.Vote
   , Z.history     = []
   }
 
-elect :: Z.Step -> Z.CandidateName -> Double -> Z.Step
-elect step candidate value = step
+elect :: Z.Step -> Z.CandidateName -> Double -> Set Z.VoteId -> Z.Step
+elect step candidate value contributions = step
   & the @"elected" %~ S.insert candidate
   & the @"votes"   .~ adjustedVoteValues -- TODO this adjustment is fake
   where adjustedVoteValues = step ^. the @"votes"
 
 stepElection :: Z.Step -> Z.Step
 stepElection step = case maybeTopChoice of
-  Just (value, candidate) -> elect step candidate value
+  Just (value, candidate) -> uncurry (elect step candidate) value
   Nothing                 -> step & the @"progress" .~ Z.Done
   where maybeTopChoice  = listToMaybe (sortBy (flip compare) (fmap swap (M.toList tally)))
         tally           = tallyVotes (step ^. the @"votes") (step ^. the @"ballot") exclusions
