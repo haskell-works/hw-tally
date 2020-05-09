@@ -27,7 +27,7 @@ import qualified HaskellWorks.Tally.Type          as Z
 import qualified System.Directory                 as IO
 import qualified System.IO                        as IO
 
-{-# ANN module ("HLint: ignore Reduce duplication"  :: String) #-}
+{- HLINT ignore "Reduce duplication"    -}
 
 decodeVote :: (FilePath, BS.ByteString) -> Either String (Text, Z.Preferences)
 decodeVote (filePath, contents) = case Y.decodeEither contents of

@@ -13,7 +13,7 @@ import Test.Hspec
 
 import qualified Text.ParserCombinators.ReadP as RP
 
-{-# ANN module ("HLint: ignore Redundant do"  :: String) #-}
+{- HLINT ignore "Redundant do"    -}
 
 spec :: Spec
 spec = describe "HaskellWorks.TallySpec" $ do
