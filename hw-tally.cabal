@@ -1,86 +1,101 @@
-cabal-version: 1.12
-name: hw-tally
-version: 1.0.0.0
-license: BSD3
-license-file: LICENSE
-copyright: 2018 John Ky
-maintainer: newhoggy@gmail.com
-author: John Ky
-homepage: https://github.com/haskell-works/hw-tally#readme
-bug-reports: https://github.com/haskell-works/hw-tally/issues
-synopsis: Library for counting votes
-description:
-    Please see README.md
-category: Network
-build-type: Simple
-extra-source-files:
-    README.md
+cabal-version: 2.2
+
+name:               hw-tally
+version:            1.0.0.0
+license:            BSD-3-Clause
+license-file:       LICENSE
+copyright:          2018 John Ky
+maintainer:         newhoggy@gmail.com
+author:             John Ky
+homepage:           https://github.com/haskell-works/hw-tally#readme
+bug-reports:        https://github.com/haskell-works/hw-tally/issues
+synopsis:           Library for counting votes
+description:        Library for counting votes. Please see README.md
+category:           Data
+build-type:         Simple
+extra-source-files: README.md
 
 source-repository head
-    type: git
-    location: https://github.com/haskell-works/hw-tally
+  type: git
+  location: https://github.com/haskell-works/hw-tally
+
+common base                 { build-depends: base                 >= 4.7        && <  5     }
+
+common aeson                { build-depends: aeson                                          }
+common bytestring           { build-depends: bytestring                                     }
+common containers           { build-depends: containers                                     }
+common directory            { build-depends: directory                                      }
+common generic-lens         { build-depends: generic-lens         >= 0.5.1.0    && < 1.2    }
+common hedgehog             { build-depends: hedgehog             >= 0.5.3      && < 1.1    }
+common hspec                { build-depends: hspec                >= 2.4.4      && < 2.8    }
+common hw-hspec-hedgehog    { build-depends: hw-hspec-hedgehog    >= 0.1.0.2    && < 0.2    }
+common hw-tally             { build-depends: hw-tally                                       }
+common lens                 { build-depends: lens                                           }
+common mtl                  { build-depends: mtl                                            }
+common optparse-applicative { build-depends: optparse-applicative >= 0.14       && < 0.16   }
+common text                 { build-depends: text                 >= 1.2.2.2    && < 1.3    }
+common vector               { build-depends: vector               >= 0.12       && < 0.13   }
+common yaml                 { build-depends: yaml                                           }
+
+common config
+  default-language:     Haskell2010
+  ghc-options:          -Wall
 
 library
-  exposed-modules:
-    HaskellWorks.Tally
-    HaskellWorks.Tally.IO.ByteString
-    HaskellWorks.Tally.Type
-  hs-source-dirs: src
-  other-modules:
-      Paths_hw_tally
-  default-language: Haskell2010
-  build-depends:
-      base            >= 4            && < 4.13
-    , aeson
-    , bytestring
-    , containers
-    , directory
-    , generic-lens    >= 0.5.1.0      && < 1.2
-    , lens
-    , text            >= 1.2.2.2      && < 1.3
-    , vector
-    , yaml
+  import:               base, config
+                      , aeson
+                      , bytestring
+                      , containers
+                      , directory
+                      , generic-lens
+                      , lens
+                      , text
+                      , vector
+                      , yaml
+  exposed-modules:      HaskellWorks.Tally
+                        HaskellWorks.Tally.IO.ByteString
+                        HaskellWorks.Tally.Type
+  hs-source-dirs:       src
+  other-modules:        Paths_hw_tally
+  autogen-modules:      Paths_hw_tally
+  default-language:     Haskell2010
 
 executable hw-tally
-  main-is: Main.hs
-  other-modules:
-      App.Commands
-      App.Commands.Run
-      App.Commands.Types
-      Paths_hw_tally
-  hs-source-dirs:
-      app
-  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base                  >= 4        && < 5
-    , aeson
-    , bytestring
-    , containers
-    , directory
-    , generic-lens
-    , hw-tally
-    , lens
-    , mtl
-    , optparse-applicative  >= 0.14     && < 0.15
-    , text
-    , vector                >= 0.12     && < 0.13
-    , yaml
-  default-language: Haskell2010
+  import:               base, config
+                      , aeson
+                      , bytestring
+                      , containers
+                      , directory
+                      , generic-lens
+                      , hw-tally
+                      , lens
+                      , mtl
+                      , optparse-applicative
+                      , text
+                      , vector
+                      , yaml
+  main-is:              Main.hs
+  other-modules:        App.Commands
+                        App.Commands.Run
+                        App.Commands.Types
+                        Paths_hw_tally
+  hs-source-dirs:       app
+  ghc-options:          -Wall -threaded -rtsopts -with-rtsopts=-N
+  default-language:     Haskell2010
 
 test-suite hw-tally-test
-    type: exitcode-stdio-1.0
-    main-is: Spec.hs
-    hs-source-dirs: test
-    other-modules:
-        HaskellWorks.TallySpec
-        Paths_hw_tally
-    default-language: Haskell2010
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N
-    build-depends:
-        base              >= 4          && < 4.13
-      , generic-lens
-      , hedgehog          >= 0.5.3      && < 0.7
-      , hspec             >= 2.4.4      && < 2.6
-      , hw-hspec-hedgehog >= 0.1.0.2    && < 0.2
-      , hw-tally
-      , text
+  import:               base, config
+                      , generic-lens
+                      , hedgehog
+                      , hspec
+                      , hw-hspec-hedgehog
+                      , hw-tally
+                      , text
+  type:                 exitcode-stdio-1.0
+  main-is:              Spec.hs
+  hs-source-dirs:       test
+  other-modules:        HaskellWorks.TallySpec
+                        Paths_hw_tally
+  build-tool-depends:   hspec-discover:hspec-discover
+  default-language:     Haskell2010
+  ghc-options:          -threaded -rtsopts -with-rtsopts=-N
